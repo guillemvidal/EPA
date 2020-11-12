@@ -1,0 +1,238 @@
+---
+title: "INE"
+author: "Guillem Vidal"
+date: "11/2020"
+output: html_document
+---
+
+# Preliminares
+
+```{r}
+# Limpiar lista
+rm(list=ls())
+```
+
+```{r setup, include=FALSE, echo=FALSE}
+require(knitr)
+opts_knit$set(root.dir = "/Users/guillem/Desktop/INE")
+```
+
+Instalar y cargar los paquetes necesarios:
+```{r}
+# Paquetes
+packages <- c("tidyverse", "kableExtra", "filesstrings", "readxl")
+
+# Instalar paquetes no instalados
+installed_packages <- packages %in% rownames(installed.packages())
+if (any(installed_packages == FALSE)) {
+  install.packages(packages[!installed_packages])
+}
+
+# Cargar paquetes
+lapply(packages, library, character.only = TRUE)
+```
+
+
+# Datos
+
+```{r}
+# Cuestionario
+cuestionario = "https://www.ine.es/inebaseDYN/epa30308/docs/epacues05.pdf"
+download.file(cuestionario, destfile = "epacues05.pdf")
+
+# Diseño de registro y valores válidos
+dr_EPA_2005 = "ftp://www.ine.es/temas/epa/dr_EPA_2005.xlsx"
+download.file(dr_EPA_2005, destfile = "dr_EPA_2005.xlsx")
+
+```
+
+## Datos_1t20
+```{r}
+# Microdatos T1/2020
+datos_1t20 = "ftp://www.ine.es/temas/epa/datos_1t20.zip"
+download.file(datos_1t20, destfile = "datos_1t20.zip")
+
+# Unzip y organizar carpeta
+zipF<- "datos_1t20.zip"
+outDir<-"."
+unzip(zipF,exdir=outDir)
+
+unlink("SAS", recursive = TRUE)
+unlink("SPSS", recursive = TRUE)
+unlink("STATA", recursive = TRUE)
+unlink("CSV", recursive = TRUE)
+unlink("R", recursive = TRUE)
+
+# Asignar variables a datos
+df <- read_excel('dr_EPA_2005.xlsx', skip = 1)
+df <- head(df,-7)
+nombresVarbls <- df[,1]
+nombresTablas <- df[,2]
+posiciones    <- df[,3]
+tipo          <- df[,4]
+tamanio       <- length(nombresVarbls)
+
+# Lectura del fichero de microdatos (MICROD)
+fichero_micro <- "md_EPA_2020T1.txt"
+if(length(df) == 4){
+  cat("Sin formato")
+  #Capturamos las columnas con su tipo de dato
+  tipDatos <- as.vector(sapply(df[,4], function(x){
+    if(identical(x, "A"))
+      "character"
+    else{
+      if(identical(x, "N"))
+        "numeric"}}))
+  # Lectura del fichero de microdatos (MICROD), decimales con punto en MD  
+  tryCatch((df1 <- read.fwf(file = fichero_micro, widths= posiciones, colClasses=tipDatos)), sep = "")
+}else{
+  formatos <- df[,5]  
+  cat("Con formato")
+  # Lectura del fichero de microdatos (MICROD), decimales sin punto en MD
+  tryCatch((df1 <- read.fortran(file = fichero_micro, format= formatos)), sep = "")
+}
+
+#Aplicamos los nombres de la cabecera del registro
+names(df1) <- t(df[,1])
+datos_1t20 <- df1
+
+# Limpieza
+rm(nombresVarbls,nombresTablas,posiciones,tamanio,df,df1,formatos,tipo)
+rm(cuestionario,dr_EPA_2005,fichero_micro,outDir,zipF,packages,installed_packages)
+if(length(df) == 4){rm(tipDatos)}
+
+# Guardar datos
+save(datos_1t20, file = "datos_1t20.Rdata")
+```
+
+## Datos_2t20
+```{r}
+# Microdatos T2/2020
+datos_2t20 = "ftp://www.ine.es/temas/epa/datos_2t20.zip"
+download.file(datos_2t20, destfile = "datos_2t20.zip")
+
+# Unzip y organizar carpeta
+zipF<- "datos_2t20.zip"
+outDir<-"."
+unzip(zipF,exdir=outDir)
+
+unlink("SAS", recursive = TRUE)
+unlink("SPSS", recursive = TRUE)
+unlink("STATA", recursive = TRUE)
+unlink("CSV", recursive = TRUE)
+unlink("R", recursive = TRUE)
+
+# Asignar variables a datos
+df <- read_excel('dr_EPA_2005.xlsx', skip = 1)
+df <- head(df,-7)
+nombresVarbls <- df[,1]
+nombresTablas <- df[,2]
+posiciones    <- df[,3]
+tipo          <- df[,4]
+tamanio       <- length(nombresVarbls)
+
+# Lectura del fichero de microdatos (MICROD)
+fichero_micro <- "md_EPA_2020T2.txt"
+if(length(df) == 4){
+  cat("Sin formato")
+  #Capturamos las columnas con su tipo de dato
+  tipDatos <- as.vector(sapply(df[,4], function(x){
+    if(identical(x, "A"))
+      "character"
+    else{
+      if(identical(x, "N"))
+        "numeric"}}))
+  # Lectura del fichero de microdatos (MICROD), decimales con punto en MD  
+  tryCatch((df1 <- read.fwf(file = fichero_micro, widths= posiciones, colClasses=tipDatos)), sep = "")
+}else{
+  formatos <- df[,5]  
+  cat("Con formato")
+  # Lectura del fichero de microdatos (MICROD), decimales sin punto en MD
+  tryCatch((df1 <- read.fortran(file = fichero_micro, format= formatos)), sep = "")
+}
+
+#Aplicamos los nombres de la cabecera del registro
+names(df1) <- t(df[,1])
+datos_2t20 <- df1
+
+# Limpieza
+rm(nombresVarbls,nombresTablas,posiciones,tamanio,df,df1,formatos,tipo)
+rm(cuestionario,dr_EPA_2005,fichero_micro,outDir,zipF,packages,installed_packages)
+if(length(df) == 4){rm(tipDatos)}
+
+# Guardar datos
+save(datos_2t20, file = "datos_2t20.Rdata")
+```
+
+## Datos_3t20
+```{r}
+# Microdatos T3/2020
+datos_3t20 = "ftp://www.ine.es/temas/epa/datos_3t20.zip"
+download.file(datos_3t20, destfile = "datos_3t20.zip")
+
+# Unzip y organizar carpeta
+zipF<- "datos_3t20.zip"
+outDir<-"."
+unzip(zipF,exdir=outDir)
+
+unlink("SAS", recursive = TRUE)
+unlink("SPSS", recursive = TRUE)
+unlink("STATA", recursive = TRUE)
+unlink("CSV", recursive = TRUE)
+unlink("R", recursive = TRUE)
+
+# Asignar variables a datos
+df <- read_excel('dr_EPA_2005.xlsx', skip = 1)
+df <- head(df,-7)
+nombresVarbls <- df[,1]
+nombresTablas <- df[,2]
+posiciones    <- df[,3]
+tipo          <- df[,4]
+tamanio       <- length(nombresVarbls)
+
+# Lectura del fichero de microdatos (MICROD)
+fichero_micro <- "md_EPA_2020T3.txt"
+if(length(df) == 4){
+  cat("Sin formato")
+  #Capturamos las columnas con su tipo de dato
+  tipDatos <- as.vector(sapply(df[,4], function(x){
+    if(identical(x, "A"))
+      "character"
+    else{
+      if(identical(x, "N"))
+        "numeric"}}))
+  # Lectura del fichero de microdatos (MICROD), decimales con punto en MD  
+  tryCatch((df1 <- read.fwf(file = fichero_micro, widths= posiciones, colClasses=tipDatos)), sep = "")
+}else{
+  formatos <- df[,5]  
+  cat("Con formato")
+  # Lectura del fichero de microdatos (MICROD), decimales sin punto en MD
+  tryCatch((df1 <- read.fortran(file = fichero_micro, format= formatos)), sep = "")
+}
+
+#Aplicamos los nombres de la cabecera del registro
+names(df1) <- t(df[,1])
+datos_3t20 <- df1
+
+# Limpieza
+rm(nombresVarbls,nombresTablas,posiciones,tamanio,df,df1,formatos,tipo)
+rm(cuestionario,dr_EPA_2005,fichero_micro,outDir,zipF,packages,installed_packages)
+if(length(df) == 4){rm(tipDatos)}
+
+# Guardar datos
+save(datos_3t20, file = "datos_3t20.Rdata")
+```
+
+## Combinar
+```{r}
+# Combinar
+datos20 <- rbind(datos_1t20, datos_2t20, datos_3t20)
+
+# Guardar datos
+save(datos20, file = "datos_20.Rdata")
+```
+
+
+
+
+
